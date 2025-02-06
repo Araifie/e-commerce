@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import { BsCheckCircleFill } from "react-icons/bs";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { logoLight } from "../../assets/images";
+import { doSignInWithEmailAndPassword } from "../../firebase/auth";
+import { useAuth } from "../../contexts/authContext";
+
 
 const SignIn = () => {
+
+  const {userLoggedIn} = useAuth();
+  
   // ============= Initial State Start here =============
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // ============= Initial State End here ===============
-  // ============= Error Msg Start here =================
+  const [isSigningIn,setSigningIn] = useState("");
   const [errEmail, setErrEmail] = useState("");
   const [errPassword, setErrPassword] = useState("");
 
@@ -24,27 +29,18 @@ const SignIn = () => {
     setErrPassword("");
   };
   // ============= Event Handler End here ===============
-  const handleSignUp = (e) => {
-    e.preventDefault();
+  
 
-    if (!email) {
-      setErrEmail("Enter your email");
+  const onSubmit = async (e) => {
+    e.preventDefault()
+    if(!isSigningIn) {
+      setSigningIn(true)
+      await doSignInWithEmailAndPassword(email, password)
     }
-
-    if (!password) {
-      setErrPassword("Create a password");
-    }
-    // ============== Getting the value ==============
-    if (email && password) {
-      setSuccessMsg(
-        `Hello dear, Thank you for your attempt. We are processing to validate your access. Till then stay connected and additional assistance will be sent to you by your mail at ${email}`
-      );
-      setEmail("");
-      setPassword("");
-    }
-  };
+  }
   return (
     <div className="w-full h-screen flex items-center justify-center">
+      {userLoggedIn && (<Navigate to ={"/"} replace={true} />)}
       <div className="w-1/2 hidden lgl:inline-flex h-full text-white">
         <div className="w-[450px] h-full bg-primeColor px-10 flex flex-col gap-6 justify-center">
           <Link to="/">
@@ -176,7 +172,7 @@ const SignIn = () => {
                 </div>
 
                 <button
-                  onClick={handleSignUp}
+                  onSubmit={onSubmit}
                   className="bg-primeColor hover:bg-black text-gray-200 hover:text-white cursor-pointer w-full text-base font-medium h-10 rounded-md  duration-300"
                 >
                   Sign In
